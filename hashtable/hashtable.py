@@ -37,7 +37,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
-        return len(self.capacity)
+        return len(self.storage)
 
     def get_load_factor(self):
         """
@@ -46,6 +46,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return self.size / self.capacity
 
     def fnv1(self, key):
         """
@@ -88,36 +89,43 @@ class HashTable:
 
         Implement this.
         """
-        index = self.hash_index(key)
-        self.size += 1
-        self.storage[index] = HashTableEntry(key, value)
-        return None
+        # index = self.hash_index(key)
+        # self.size += 1
+        # self.storage[index] = HashTableEntry(key, value)
+        # return None
 
         # Find the hash index
         # Search the list for the key
         # If it's there, replace the value
         # If it's not, append a new item to the list
 
-        # index = self.hash_index(key)
-        # current = self.storage[index]
+        index = self.hash_index(key)
+        current = self.storage[index]
 
-        # if current is not None:
-        #     # loop to search the list for the key
-        #     while current is not None:
-        #         if current.key == key:
-        #             # If it's there, replace the value
-        #             current.value = value
-        #             break
+        if current is not None:
+            # loop to search the list for the key
+            while current is not None:
+                if current.key == key:
+                    # If it's there, replace the value
+                    current.value = value
+                    break
 
-        #         current = current.next
-        #     # If it's not there, append a new record to the list
-        #     else:
-        #         new_node = HashTableEntry(key, value)
-        #         new_node.next = self.storage[index]
-        #         self.storage[index] = new_node
+                current = current.next
+            # If it's not there, append a new record to the list
+            else:
+                new_node = HashTableEntry(key, value)
+                new_node.next = self.storage[index]
+                self.storage[index] = new_node
 
-        # else:
-        #     self.storage[index] = HashTableEntry(key, value)
+        else:
+            self.storage[index] = HashTableEntry(key, value)
+
+        # when load factor goes above 0.7, automatically rehash to double its size
+        load_factor = self.get_load_factor()
+        if load_factor > 0.7:
+            self.resize(self.capacity * 2)
+
+        return None
 
     def delete(self, key):
         """
@@ -127,33 +135,29 @@ class HashTable:
 
         Implement this.
         """
-        self.size -= 1
-        self.put(key, None)
+        # self.size -= 1
+        # self.put(key, None)
+        # return None
+
+        # Find the hash index
+        # Search the list for the key
+        # If found, delete form the list
+        # Else, return None
+
+        # Find the hash index
+        index = self.hash_index(key)
+
+        # Search the list for the key
+        current = self.storage[index]
+        # while current is not None
+        while current is not None:
+            # if found, delete node from list
+            if current.key == key:
+                current.value = None
+                break
+            current = current.next
+
         return None
-
-        # # Find the hash index
-        # # Search the list for the key
-        # # If found, delete form the list, (return the node or value?)
-        # # Else, return None
-
-        # # Find the hash index
-        # index = self.hash_index(key)
-
-        # # Search the list for the key
-        # if self.storage[index] is not None:
-        #     # If found, delete the node from the list
-        #     if self.storage[index].key == key:
-        #         self.storage[index].value = None
-        #     else:
-        #         current = self.storage[index].next
-        #         while current is not None:
-        #             if current.key == key:
-        #                 current.value = None
-        #             current = current.next
-
-        # # Else return None
-        # else:
-        #     return None
 
     def get(self, key):
         """
@@ -163,29 +167,26 @@ class HashTable:
 
         Implement this.
         """
-        index = self.hash_index(key)
-
-        if self.storage[index] is not None:
-            return self.storage[index].value
-
-        return self.capacity[index]
-
-        # # Find the hash index
         # index = self.hash_index(key)
 
-        # # Search the list for the key
-        # if self.storage[index].key == key:
-        #     # If found, return the value
+        # if self.storage[index] is not None:
         #     return self.storage[index].value
 
-        # else:
-        #     current = self.storage[index].next
-        #     while current is not None:
-        #         if current.key == key:
-        #             return current.value
-        #         current = current.next
+        # return self.capacity[index]
 
-        # return None
+        # Find the hash index
+        index = self.hash_index(key)
+
+        # Search the list for the key
+        current = self.storage[index]
+        # while current is not None
+        while current is not None:
+            # if found, return node from list
+            if current.key == key:
+                return current.value
+            current = current.next
+
+        return None
 
     def resize(self, new_capacity):
         """
@@ -194,7 +195,24 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        # 1. make new, bigger table / array
+        # 2. go through all old elements, hash into new list
+
+        # make new, bigger table / array
+        old_storage = self.storage
+        self.storage = [None] * new_capacity
+
+        # go through all old elements + hash into new list
+        for current in old_storage:
+            if current is not None and current.next is None:
+                self.put(current.key, current.value)
+            if current is not None and current.next is not None:
+                while current.next is not None:
+                    self.put(current.key, current.value)
+                    current = current.next
+                self.put(current.key, current.value)
+
+        return None
 
 
 if __name__ == "__main__":
